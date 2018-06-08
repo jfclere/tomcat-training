@@ -1,0 +1,65 @@
+install java
+yum install java-openjdk
+search it yum search + grep java + grep open etc
+Don't use java9 for the moment...
+
+install tomcat
+download wget + tar xvf (something like apache-tomcat-9.0.8.tar.gz).
+
+http://localhost:8080
+
+create a jsp. (example toto.jsp)
+
+show the compilation
+./work/Catalina/localhost/ROOT/org/apache/jsp/toto_jsp.class
+
+show the log
+logs/localhost.2018-05-26.log:26-May-2018 16:49:36.820 INFO [https-openssl-apr-8443-exec-2] org.apache.catalina.core.ApplicationContext.log jsp: coucou
+
+explain log rotation etc.
+
+prepare the native connector (for linux).
+
+install dependencies:
+apr-devel, open-devel and some other stuff gcc.
+extract sources
+
+configure
+finding java.
+[jfclere@dhcp-144-173 apache-tomcat-9.0.8]$ which java
+/usr/bin/java
+[[jfclere@dhcp-144-173 apache-tomcat-9.0.8]$ which java
+/usr/bin/java
+[jfclere@dhcp-144-173 apache-tomcat-9.0.8]$ ls -lt /usr/bin/java
+lrwxrwxrwx. 1 root root 22 May  2 08:47 /usr/bin/java -> /etc/alternatives/java
+[jfclere@dhcp-144-173 apache-tomcat-9.0.8]$ ls -lt /etc/alternatives/java
+lrwxrwxrwx. 1 root root 72 May  2 08:47 /etc/alternatives/java -> /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.171-4.b10.fc27.x86_64/jre/bin/java
+java home is usr/lib/jvm/java-1.8.0-openjdk-1.8.0.171-4.b10.fc27.x86_64
+configure --with-java-home=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.171-4.b10.fc27.x86_64
+make
+make install
+
+bin/setenv.sh
+set LD_LIBRARY_PATH
+
+prepare the certificate/key pairs
+install openssl-perl (or something like).
+sudo CA.pl -newca (create self signed CA to import in browser).
+
+CA.pl -newreq
+
+sudo CA.pl -sign
+
++++
+    <Connector port="8443" protocol="org.apache.coyote.http11.Http11AprProtocol"
+               maxThreads="150" SSLEnabled="true" >
+        <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
+        <SSLHostConfig>
+            <Certificate certificateKeyFile="/home/jfclere/TMP/apache-tomcat-9.0.8/newkey.pem"
+                         certificateFile="/home/jfclere/TMP/apache-tomcat-9.0.8/newcert.pem"
+                         certificateKeyPassword="mypassword"
+                         type="RSA" />
+        </SSLHostConfig>
+    </Connector>
+
++++
